@@ -1,0 +1,33 @@
+# Render Blueprint: New → Blueprint → connect GitHub repo with this file at repo root
+databases:
+  - name: local-guru-db
+    plan: free
+    databaseName: local_guru
+    user: local_guru
+
+services:
+  - type: web
+    name: local-guru-shopping
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: FLASK_DEBUG
+        value: "false"
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: local-guru-db
+          property: connectionString
+      # Optional: override auto-detected RENDER_EXTERNAL_URL for email links
+      - key: PUBLIC_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: FAST2SMS_API_KEY
+        sync: false
