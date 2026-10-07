@@ -6,9 +6,11 @@ load_dotenv()
 def _database_url():
     url = os.getenv('DATABASE_URL')
     if url:
-        # Render Postgres uses postgres://; SQLAlchemy expects postgresql://
+        # Render: postgres://… → force psycopg2 driver (we ship psycopg2-binary, not psycopg v3)
         if url.startswith('postgres://'):
-            url = url.replace('postgres://', 'postgresql://', 1)
+            url = url.replace('postgres://', 'postgresql+psycopg2://', 1)
+        elif url.startswith('postgresql://') and '+psycopg' not in url.split('://', 1)[0]:
+            url = url.replace('postgresql://', 'postgresql+psycopg2://', 1)
         return url
     base = os.path.abspath(os.path.dirname(__file__))
     return f"sqlite:///{os.path.join(base, 'local_guru.db')}"
