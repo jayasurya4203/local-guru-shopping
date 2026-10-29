@@ -54,8 +54,8 @@ export default function CartDrawer({
       <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-300">
         
         {/* Cart Header */}
-        <div className="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between bg-slate-50">
-          <div className="flex items-center space-x-2">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-2 bg-slate-50">
+          <div className="flex items-center gap-2 min-w-0">
             <ShoppingBag className="w-5 h-5 text-indigo-600" />
             <h3 className="font-extrabold text-slate-900 text-lg">My Shopping Cart</h3>
             <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full">

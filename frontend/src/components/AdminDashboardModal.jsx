@@ -184,8 +184,8 @@ export default function AdminDashboardModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-6xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 relative my-6 flex flex-col animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/80 flex items-end sm:items-center justify-center sm:p-4">
+      <div className="bg-white sheet max-w-6xl w-full overflow-y-auto shadow-2xl relative flex flex-col">
         
         {/* Header Bar */}
         <div className="p-6 bg-slate-900 text-white flex items-center justify-between sticky top-0 z-20 shadow-md">
@@ -232,7 +232,7 @@ export default function AdminDashboardModal({
         )}
 
         {/* Tab Navigation */}
-        <div className="bg-slate-100 border-b border-slate-200 px-6 py-2 flex items-center space-x-2 overflow-x-auto">
+        <div className="bg-slate-100 border-b border-slate-200 px-3 sm:px-6 py-2 flex items-center gap-2 overflow-x-auto">
           {[
             { id: 'overview', label: 'Overview Stats', icon: DollarSign },
             { id: 'monitor', label: `Login & Logout Monitor (${activityLogs.length})`, icon: Activity },

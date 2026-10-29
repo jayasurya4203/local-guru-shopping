@@ -1,81 +1,59 @@
 import React from 'react';
-import { ArrowRight, Tag, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { ArrowRight, Truck, ShieldCheck, RefreshCw } from 'lucide-react';
+
+const PERKS = [
+  { icon: Truck, label: 'Free delivery over ₹499' },
+  { icon: ShieldCheck, label: 'Secure checkout' },
+  { icon: RefreshCw, label: '7-day easy returns' }
+];
 
 export default function HeroBanner({ onShopNow }) {
   return (
-    <div className="relative overflow-hidden bg-slate-900 text-white py-12 px-4 sm:px-6 rounded-3xl my-6 mx-4 sm:mx-6 shadow-2xl">
-      {/* Background Glows */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-purple-600/30 rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-pink-600/30 rounded-full blur-3xl"></div>
-
-      <div className="relative max-w-7xl mx-auto grid md:grid-cols-2 gap-8 items-center">
-        {/* Left Column: Text Content */}
-        <div className="space-y-4">
-          <div className="inline-flex items-center space-x-2 bg-white/10 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20 text-xs font-semibold text-amber-300">
-            <Tag className="w-3.5 h-3.5" />
-            <span>FESTIVE FASHION COLLECTION 2026</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
-            Discover Exceptional <span className="gradient-text">Local Styles</span> & Quality
-          </h2>
-
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-lg">
-            Shop directly from top verified regional weavers, boutiques & fashion masters. Enjoy up to <strong className="text-amber-400">40% OFF</strong> on Kurtis, Sarees, Men's Linen & Kids collections.
+    <section className="mt-4 rounded-3xl overflow-hidden bg-stone-900 text-white">
+      <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+        <div className="p-5 sm:p-8 lg:p-10 space-y-4">
+          <p className="inline-flex text-[11px] font-bold tracking-[0.16em] uppercase text-amber-200 bg-white/10 px-3 py-1 rounded-full">
+            Festive edit 2026
           </p>
-
-          <div className="pt-2 flex flex-wrap gap-4 items-center">
-            <button
-              onClick={onShopNow}
-              className="bg-white text-slate-900 hover:bg-slate-100 px-6 py-3 rounded-full font-bold text-sm flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-0.5 cursor-pointer"
-            >
-              <span>EXPLORE NOW</span>
-              <ArrowRight className="w-4 h-4 text-indigo-600" />
-            </button>
-
-            <span className="text-xs text-slate-400">
-              ⚡ Guaranteed Authentic • Express Local Delivery
-            </span>
-          </div>
-
-          {/* Quick Value Badges */}
-          <div className="pt-6 grid grid-cols-3 gap-2 border-t border-slate-800 text-xs text-slate-300">
-            <div className="flex items-center space-x-2">
-              <Truck className="w-4 h-4 text-emerald-400 shrink-0" />
-              <span>Free Delivery &gt; ₹499</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <ShieldCheck className="w-4 h-4 text-sky-400 shrink-0" />
-              <span>Razorpay Verified</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <RefreshCw className="w-4 h-4 text-purple-400 shrink-0" />
-              <span>7-Day Easy Return</span>
-            </div>
-          </div>
+          <h2 className="text-[1.7rem] sm:text-5xl font-black tracking-tight leading-[1.05]">
+            Local fashion, priced clearly.
+          </h2>
+          <p className="text-stone-300 text-sm sm:text-base max-w-md leading-relaxed">
+            Kurtis, sarees, linen shirts, and kids festive wear from regional makers. Up to 30% off this week.
+          </p>
+          <button
+            type="button"
+            onClick={onShopNow}
+            className="inline-flex items-center gap-2 bg-white text-stone-900 font-bold text-sm px-5 py-3 rounded-full"
+          >
+            Shop the collection
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+            {PERKS.map((perk) => (
+              <li key={perk.label} className="flex items-center gap-2 text-xs text-stone-300 bg-white/5 rounded-xl px-3 py-2">
+                <perk.icon className="w-4 h-4 text-amber-300 shrink-0" />
+                {perk.label}
+              </li>
+            ))}
+          </ul>
         </div>
-
-        {/* Right Column: Hero Collage Preview */}
-        <div className="relative flex justify-center">
-          <div className="relative w-full max-w-md aspect-4/3 rounded-2xl overflow-hidden shadow-2xl border border-white/10 group">
-            <img
-              src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1000"
-              alt="Local Guru Fashion Banner"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
-            <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-slate-900/80 backdrop-blur-md border border-white/10 flex items-center justify-between">
-              <div>
-                <p className="text-xs text-amber-400 font-bold uppercase tracking-wider">TRENDING SELLER</p>
-                <p className="text-sm font-bold text-white">Designer Handloom Silk Kurti</p>
-              </div>
-              <span className="bg-emerald-500 text-white text-xs font-extrabold px-3 py-1 rounded-full">
-                ₹1,199
-              </span>
+        <div className="relative min-h-52 sm:min-h-72">
+          <img
+            src="https://images.unsplash.com/photo-1610030469983-98e550d6193c?w=1200"
+            alt="Handloom silk kurti"
+            className="absolute inset-0 w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/70 via-transparent to-transparent" />
+          <div className="absolute bottom-4 left-4 right-4 bg-white/95 text-stone-900 rounded-2xl px-4 py-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-800">Best seller</p>
+              <p className="text-sm font-bold truncate">Designer handloom silk kurti</p>
             </div>
+            <span className="shrink-0 text-sm font-black">₹1,199</span>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

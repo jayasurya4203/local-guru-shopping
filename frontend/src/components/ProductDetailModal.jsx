@@ -42,8 +42,8 @@ export default function ProductDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 relative my-8 animate-in fade-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/70 flex items-end sm:items-center justify-center sm:p-4">
+      <div className="bg-white sheet max-w-4xl w-full overflow-y-auto shadow-2xl relative">
         
         {/* Close Button */}
         <button
@@ -53,7 +53,7 @@ export default function ProductDetailModal({
           <X className="w-5 h-5" />
         </button>
 
-        <div className="grid md:grid-cols-2 gap-8 p-6 sm:p-8">
+        <div className="grid md:grid-cols-2 gap-6 p-4 sm:p-8 pt-14">
           {/* Left Column: Image & Badges */}
           <div className="space-y-4">
             <div className="relative aspect-4/3 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
@@ -70,7 +70,7 @@ export default function ProductDetailModal({
             </div>
 
             {/* Guarantees */}
-            <div className="grid grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-[11px] text-slate-600">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-50 p-3 rounded-xl border border-slate-200/60 text-[11px] text-slate-600">
               <div className="flex flex-col items-center text-center space-y-1">
                 <Truck className="w-4 h-4 text-indigo-600" />
                 <span>Express Shipping</span>
@@ -204,7 +204,7 @@ export default function ProductDetailModal({
             </div>
 
             {/* Action Buttons */}
-            <div className="pt-4 flex items-center space-x-3">
+            <div className="pt-4 grid grid-cols-2 gap-2 sm:flex sm:items-center">
               <button
                 onClick={() => onAddToCart(product, selectedSize, selectedColor, quantity)}
                 className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-6 rounded-2xl flex items-center justify-center space-x-2 shadow-lg hover:shadow-xl transition-all"

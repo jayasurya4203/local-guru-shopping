@@ -15,8 +15,8 @@ export default function WishlistDrawer({
       <div className="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between border-l border-slate-200 animate-in slide-in-from-right duration-300">
         
         {/* Wishlist Header */}
-        <div className="p-4 sm:p-6 border-b border-slate-200 flex items-center justify-between bg-rose-50/50">
-          <div className="flex items-center space-x-2">
+        <div className="p-4 border-b border-slate-200 flex items-center justify-between gap-2 bg-rose-50/50">
+          <div className="flex items-center gap-2 min-w-0">
             <Heart className="w-5 h-5 text-rose-600 fill-rose-600" />
             <h3 className="font-extrabold text-slate-900 text-lg">My Saved Wishlist</h3>
             <span className="bg-rose-100 text-rose-700 text-xs font-bold px-2.5 py-0.5 rounded-full">

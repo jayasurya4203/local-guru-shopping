@@ -15,8 +15,8 @@ export default function OrderConfirmationModal({ orderDetails, onClose, onViewOr
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative text-center space-y-6 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 z-50 bg-slate-900/70 flex items-end sm:items-center justify-center p-3 sm:p-4">
+      <div className="bg-white rounded-3xl max-w-lg w-full max-h-[92dvh] overflow-y-auto p-5 sm:p-8 shadow-2xl relative text-center space-y-5">
         
         {/* Close */}
         <button

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from './components/Navbar';
+import React, { useState, useEffect, useRef } from 'react';
+import Navbar, { MobileDock } from './components/Navbar';
 import HeroBanner from './components/HeroBanner';
 import ProductCard from './components/ProductCard';
 import ProductDetailModal from './components/ProductDetailModal';
@@ -22,7 +22,23 @@ import {
   INITIAL_REVIEWS
 } from './data/mockData';
 
-import { SlidersHorizontal, Sparkles, Filter, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, SlidersHorizontal } from 'lucide-react';
+
+function readStore(key, fallback) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+const COLLECTIONS = [
+  { id: 'all', label: 'All' },
+  { id: 'trending', label: 'Trending' },
+  { id: 'new', label: 'New' },
+  { id: 'sale', label: 'On sale' }
+];
 
 export default function App() {
   const { user, logout } = useAuth();
@@ -32,14 +48,24 @@ export default function App() {
   const [products, setProducts] = useState(INITIAL_PRODUCTS);
   const [coupons] = useState(INITIAL_COUPONS);
   const [reviews, setReviews] = useState(INITIAL_REVIEWS);
-  const [cartItems, setCartItems] = useState([]);
-  const [wishlistItems, setWishlistItems] = useState([]);
+  const [cartItems, setCartItems] = useState(() => readStore('lg_cart', []));
+  const [wishlistItems, setWishlistItems] = useState(() => readStore('lg_wishlist', []));
+  const [recentIds, setRecentIds] = useState(() => readStore('lg_recent', []));
+  const shopRef = useRef(null);
   const [orders, setOrders] = useState([]);
   const [users, setUsers] = useState([
     { id: 1, full_name: 'Surya Prakash', email: 'surya@example.com', mobile: '+91 98765 43210', status: 'Active' },
     { id: 2, full_name: 'Ananya Reddy', email: 'ananya@example.com', mobile: '+91 91234 56789', status: 'Active' }
   ]);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('lg_cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  useEffect(() => {
+    localStorage.setItem('lg_wishlist', JSON.stringify(wishlistItems));
+  }, [wishlistItems]);
 
   // Load products from real-time database
   useEffect(() => {
@@ -57,6 +83,8 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [priceFilter, setPriceFilter] = useState('all'); // 'all' | 'under500' | '500-1000' | '1000-2000' | 'above2000'
   const [sizeFilter, setSizeFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('featured');
+  const [collection, setCollection] = useState('all');
 
   // Modals & Drawers Visibility State
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -197,23 +225,75 @@ export default function App() {
       return false;
     }
 
+    if (collection === 'trending' && !prod.isTrending) return false;
+    if (collection === 'new' && !prod.isNewArrival) return false;
+    if (collection === 'sale' && !(prod.discountPercent > 0)) return false;
+
     return true;
   });
 
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    const price = (p) => Math.round(p.price * (1 - (p.discountPercent || 0) / 100));
+    if (sortBy === 'price-asc') return price(a) - price(b);
+    if (sortBy === 'price-desc') return price(b) - price(a);
+    if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+    if (sortBy === 'discount') return (b.discountPercent || 0) - (a.discountPercent || 0);
+    return 0;
+  });
+
+  const recentProducts = recentIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter(Boolean);
+
+  const openProduct = (product) => {
+    setSelectedProduct(product);
+    setRecentIds((prev) => {
+      const next = [product.id, ...prev.filter((id) => id !== product.id)].slice(0, 8);
+      localStorage.setItem('lg_recent', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const scrollToShop = () => {
+    shopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const chooseCategory = (id) => {
+    setSelectedCategory(id);
+    scrollToShop();
+  };
+
+  const resetFilters = () => {
+    setSelectedCategory('all');
+    setPriceFilter('all');
+    setSizeFilter('all');
+    setSearchQuery('');
+    setCollection('all');
+    setSortBy('featured');
+  };
+
+  const copyCoupon = async (code) => {
+    try {
+      await navigator.clipboard.writeText(code);
+    } catch {
+      /* clipboard can be blocked; the toast still names the code */
+    }
+    showToast(`${code} copied. Apply it in your bag.`);
+  };
+
+  const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
-      
-      {/* Toast Notification */}
+    <div className="min-h-screen flex flex-col bg-[#f4f1ea] text-stone-900 pb-dock">
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl flex items-center space-x-2 animate-in fade-in slide-in-from-bottom duration-300 border border-slate-700">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className="fixed bottom-20 md:bottom-6 left-3 right-3 md:left-auto md:right-6 z-50 bg-stone-900 text-white text-sm font-semibold px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-300 shrink-0" />
           <span>{toastMessage}</span>
         </div>
       )}
 
-      {/* Main Header Navbar */}
       <Navbar
-        cartCount={cartItems.reduce((sum, item) => sum + item.quantity, 0)}
+        cartCount={cartCount}
         wishlistCount={wishlistItems.length}
         onOpenCart={() => setIsCartOpen(true)}
         onOpenWishlist={() => setIsWishlistOpen(true)}
@@ -222,103 +302,133 @@ export default function App() {
         onOpenAdmin={() => setIsAdminOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
-        selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
+        onShop={scrollToShop}
         user={user}
       />
 
-      {/* Main Content Body */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6">
-        
-        {/* Hero Banner Section */}
-        <HeroBanner onShopNow={() => setSelectedCategory('all')} />
+      <main className="flex-1 max-w-6xl mx-auto w-full px-3 sm:px-6">
+        <HeroBanner onShopNow={scrollToShop} />
 
-        {/* Category Pills Navigation */}
-        <div className="my-6 flex items-center space-x-2 overflow-x-auto pb-2">
-          {categories.map((cat) => (
+        <section className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {coupons.map((coupon) => (
             <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-5 py-2.5 rounded-full text-xs font-bold shrink-0 transition-all cursor-pointer flex items-center space-x-2 ${
-                selectedCategory === cat.id
-                  ? 'bg-indigo-600 text-white shadow-md scale-105'
-                  : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-              }`}
+              key={coupon.code}
+              type="button"
+              onClick={() => copyCoupon(coupon.code)}
+              className="text-left bg-white border border-dashed border-amber-700/40 rounded-2xl px-4 py-3 hover:border-amber-800"
             >
-              <Sparkles className={`w-3.5 h-3.5 ${selectedCategory === cat.id ? 'text-amber-300' : 'text-indigo-500'}`} />
-              <span>{cat.name}</span>
+              <p className="text-[11px] uppercase tracking-wider text-amber-800 font-bold">{coupon.code}</p>
+              <p className="text-sm font-semibold text-stone-800 mt-0.5">{coupon.description}</p>
             </button>
           ))}
-        </div>
+        </section>
 
-        {/* Filters & Control Toolbar */}
-        <div className="bg-white p-4 rounded-2xl border border-slate-200 mb-8 flex flex-wrap items-center justify-between gap-4 shadow-xs">
-          <div className="flex items-center space-x-2 text-xs font-extrabold text-slate-800">
-            <Filter className="w-4 h-4 text-indigo-600" />
-            <span>FILTER PRODUCTS ({filteredProducts.length} Results)</span>
+        <div ref={shopRef} className="scroll-mt-24 mt-6 space-y-3">
+          <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+            {categories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => chooseCategory(cat.id)}
+                className={`h-9 px-3.5 rounded-full text-sm font-semibold shrink-0 ${
+                  selectedCategory === cat.id
+                    ? 'bg-stone-900 text-white'
+                    : 'bg-white text-stone-700 border border-stone-200'
+                }`}
+              >
+                {cat.id === 'all' ? 'All' : cat.name.replace('Women Kurtis & Sarees', 'Women').replace('Sarees & Lehengas', 'Sarees').replace('Men Shirts & Kurtas', 'Men').replace('Kids Wear', 'Kids')}
+              </button>
+            ))}
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-xs">
-            {/* Price Filter */}
-            <div className="flex items-center space-x-1.5">
-              <span className="text-slate-400 font-semibold">Price:</span>
-              <select
-                value={priceFilter}
-                onChange={(e) => setPriceFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-slate-700 outline-hidden"
+          <div className="flex gap-2 overflow-x-auto">
+            {COLLECTIONS.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setCollection(item.id)}
+                className={`h-8 px-3 rounded-full text-xs font-bold shrink-0 ${
+                  collection === item.id ? 'bg-amber-800 text-white' : 'bg-amber-100 text-amber-950'
+                }`}
               >
-                <option value="all">All Prices</option>
+                {item.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-2xl border border-stone-200 p-3 flex flex-col sm:flex-row sm:items-center gap-3">
+            <p className="inline-flex items-center gap-1.5 text-sm font-bold text-stone-800 shrink-0">
+              <SlidersHorizontal className="w-4 h-4" />
+              {sortedProducts.length} pieces
+            </p>
+            <div className="grid grid-cols-3 gap-2 w-full sm:ml-auto sm:w-auto">
+              <select value={priceFilter} onChange={(e) => setPriceFilter(e.target.value)} className="h-10 rounded-xl border border-stone-200 bg-stone-50 px-2 text-xs font-semibold">
+                <option value="all">Any price</option>
                 <option value="under500">Under ₹500</option>
-                <option value="500-1000">₹500 – ₹1,000</option>
-                <option value="1000-2000">₹1,000 – ₹2,000</option>
+                <option value="500-1000">₹500–1,000</option>
+                <option value="1000-2000">₹1,000–2,000</option>
                 <option value="above2000">Above ₹2,000</option>
               </select>
-            </div>
-
-            {/* Size Filter */}
-            <div className="flex items-center space-x-1.5">
-              <span className="text-slate-400 font-semibold">Size:</span>
-              <select
-                value={sizeFilter}
-                onChange={(e) => setSizeFilter(e.target.value)}
-                className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-bold text-slate-700 outline-hidden"
-              >
-                <option value="all">All Sizes</option>
+              <select value={sizeFilter} onChange={(e) => setSizeFilter(e.target.value)} className="h-10 rounded-xl border border-stone-200 bg-stone-50 px-2 text-xs font-semibold">
+                <option value="all">Any size</option>
                 <option value="S">S</option>
                 <option value="M">M</option>
                 <option value="L">L</option>
                 <option value="XL">XL</option>
                 <option value="XXL">XXL</option>
               </select>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="h-10 rounded-xl border border-stone-200 bg-stone-50 px-2 text-xs font-semibold">
+                <option value="featured">Featured</option>
+                <option value="price-asc">Price ↑</option>
+                <option value="price-desc">Price ↓</option>
+                <option value="rating">Top rated</option>
+                <option value="discount">Biggest off</option>
+              </select>
             </div>
           </div>
         </div>
 
-        {/* Product Grid */}
-        {filteredProducts.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-xs">
-            <h3 className="font-extrabold text-slate-800 text-lg">No Products Found</h3>
-            <p className="text-xs text-slate-400 mt-1">Try resetting your price or category filters.</p>
-            <button
-              onClick={() => { setSelectedCategory('all'); setPriceFilter('all'); setSizeFilter('all'); setSearchQuery(''); }}
-              className="mt-4 bg-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl"
-            >
-              Reset Filters
+        {sortedProducts.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-3xl border border-stone-200 mt-4">
+            <h3 className="font-bold text-stone-800 text-lg">Nothing matches those filters</h3>
+            <button type="button" onClick={resetFilters} className="mt-4 bg-stone-900 text-white text-sm font-bold px-4 py-2.5 rounded-full">
+              Clear filters
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
+          <div className="mt-4 grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+            {sortedProducts.map((product) => (
               <ProductCard
                 key={product.id}
                 product={product}
-                onSelectProduct={(p) => setSelectedProduct(p)}
+                compact
+                onSelectProduct={openProduct}
                 onAddToCart={(p) => handleAddToCart(p)}
                 onToggleWishlist={handleToggleWishlist}
                 isWishlisted={wishlistItems.some((w) => w.id === product.id)}
               />
             ))}
           </div>
+        )}
+
+        {recentProducts.length > 0 && (
+          <section className="mt-10">
+            <h3 className="text-lg font-black text-stone-900 mb-3">Recently viewed</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              {recentProducts.slice(0, 4).map((product) => (
+                <ProductCard
+                  key={`recent-${product.id}`}
+                  product={product}
+                  compact
+                  onSelectProduct={openProduct}
+                  onAddToCart={(p) => handleAddToCart(p)}
+                  onToggleWishlist={handleToggleWishlist}
+                  isWishlisted={wishlistItems.some((w) => w.id === product.id)}
+                />
+              ))}
+            </div>
+          </section>
         )}
       </main>
 
@@ -421,7 +531,23 @@ export default function App() {
       )}
 
       {/* Main Footer */}
-      <Footer />
+      <Footer onSelectCategory={chooseCategory} />
+
+      <MobileDock
+        cartCount={cartCount}
+        wishlistCount={wishlistItems.length}
+        user={user}
+        onHome={() => {
+          resetFilters();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+        onShop={scrollToShop}
+        onOpenCart={() => setIsCartOpen(true)}
+        onOpenWishlist={() => setIsWishlistOpen(true)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenProfile={() => setIsProfileOpen(true)}
+        onOpenAdmin={() => setIsAdminOpen(true)}
+      />
     </div>
   );
 }

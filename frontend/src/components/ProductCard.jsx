@@ -1,119 +1,85 @@
 import React from 'react';
-import { Star, Heart, ShoppingBag, Eye } from 'lucide-react';
+import { Star, Heart, ShoppingBag } from 'lucide-react';
+
+export function salePrice(product) {
+  return Math.round(product.price * (1 - (product.discountPercent || 0) / 100));
+}
 
 export default function ProductCard({
   product,
   onSelectProduct,
   onAddToCart,
   onToggleWishlist,
-  isWishlisted
+  isWishlisted,
+  compact = false
 }) {
-  const finalPrice = Math.round(product.price * (1 - (product.discountPercent || 0) / 100));
+  const finalPrice = salePrice(product);
+  const image = product.images?.[0];
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden border border-slate-200/80 hover:border-indigo-300 hover:shadow-xl transition-all duration-300 flex flex-col h-full relative">
-      {/* Discount & Badge */}
-      <div className="absolute top-3 left-3 z-10 flex flex-col gap-1">
+    <article className="group bg-white rounded-2xl border border-stone-200/80 overflow-hidden flex flex-col h-full">
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => onSelectProduct(product)}
+          className="block w-full aspect-[4/5] sm:aspect-[4/5] bg-stone-100"
+        >
+          {image ? (
+            <img src={image} alt={product.name} className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500" />
+          ) : (
+            <span className="grid place-items-center h-full text-xs text-stone-400">No image</span>
+          )}
+        </button>
         {product.discountPercent > 0 && (
-          <span className="bg-rose-600 text-white text-[11px] font-extrabold px-2.5 py-0.5 rounded-full shadow-xs">
-            {product.discountPercent}% OFF
+          <span className="absolute top-2 left-2 bg-rose-700 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            {product.discountPercent}% off
           </span>
         )}
-        {product.isTrending && (
-          <span className="bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider shadow-xs">
-            TRENDING
+        <button
+          type="button"
+          aria-label={isWishlisted ? 'Remove from wishlist' : 'Save to wishlist'}
+          onClick={() => onToggleWishlist(product)}
+          className={`absolute top-2 right-2 w-8 h-8 rounded-full grid place-items-center shadow-sm ${
+            isWishlisted ? 'bg-rose-50 text-rose-600' : 'bg-white/95 text-stone-500'
+          }`}
+        >
+          <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-rose-600' : ''}`} />
+        </button>
+      </div>
+
+      <div className={`flex flex-col flex-1 gap-2 ${compact ? 'p-2.5' : 'p-3 sm:p-4'}`}>
+        <div className="flex items-center justify-between gap-2 text-[11px] text-stone-500">
+          <span className="truncate">{product.brand}</span>
+          <span className="inline-flex items-center gap-0.5 text-amber-700 font-bold shrink-0">
+            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+            {product.rating}
           </span>
-        )}
-      </div>
-
-      {/* Wishlist Button */}
-      <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onToggleWishlist(product);
-        }}
-        className={`absolute top-3 right-3 z-10 w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-          isWishlisted
-            ? 'bg-rose-50 text-rose-600 shadow-md'
-            : 'bg-white/80 hover:bg-white text-slate-400 hover:text-rose-500 shadow-xs'
-        }`}
-        title="Save to Wishlist"
-      >
-        <Heart className={`w-4 h-4 ${isWishlisted ? 'fill-rose-600' : ''}`} />
-      </button>
-
-      {/* Product Image */}
-      <div
-        className="relative aspect-4/3 overflow-hidden bg-slate-100 cursor-pointer"
-        onClick={() => onSelectProduct(product)}
-      >
-        <img
-          src={product.images[0]}
-          alt={product.name}
-          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
-        />
-        <div className="absolute inset-0 bg-slate-900/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <button className="bg-white/90 text-slate-900 px-3.5 py-1.5 rounded-full text-xs font-bold flex items-center space-x-1 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-all">
-            <Eye className="w-3.5 h-3.5" />
-            <span>Quick View</span>
-          </button>
         </div>
-      </div>
-
-      {/* Product Details */}
-      <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
-        <div>
-          <div className="flex items-center justify-between text-xs text-slate-400 font-medium mb-1">
-            <span>{product.brand}</span>
-            <div className="flex items-center space-x-1 text-amber-500 font-bold">
-              <Star className="w-3.5 h-3.5 fill-amber-400" />
-              <span>{product.rating}</span>
-              <span className="text-slate-400 font-normal">({product.reviewsCount})</span>
-            </div>
-          </div>
-
-          <h3
-            onClick={() => onSelectProduct(product)}
-            className="font-bold text-slate-900 text-sm line-clamp-2 hover:text-indigo-600 transition-colors cursor-pointer"
-          >
-            {product.name}
-          </h3>
-        </div>
-
-        {/* Sizes Quick Preview */}
-        {product.sizes && (
-          <div className="flex items-center space-x-1">
-            <span className="text-[11px] text-slate-400 font-medium">Sizes:</span>
-            <div className="flex flex-wrap gap-1">
-              {product.sizes.map((sz) => (
-                <span key={sz} className="text-[10px] bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded-md font-semibold">
-                  {sz}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Price & Action Row */}
-        <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={() => onSelectProduct(product)}
+          className="text-left text-sm font-semibold text-stone-900 leading-snug line-clamp-2 min-h-10"
+        >
+          {product.name}
+        </button>
+        <div className="mt-auto flex items-end justify-between gap-2">
           <div>
-            <div className="flex items-baseline space-x-2">
-              <span className="text-lg font-black text-slate-900">₹{finalPrice.toLocaleString('en-IN')}</span>
-              {product.discountPercent > 0 && (
-                <span className="text-xs text-slate-400 line-through">₹{product.price.toLocaleString('en-IN')}</span>
-              )}
-            </div>
+            <p className="text-base font-black text-stone-900">₹{finalPrice.toLocaleString('en-IN')}</p>
+            {product.discountPercent > 0 && (
+              <p className="text-[11px] text-stone-400 line-through">₹{Number(product.price).toLocaleString('en-IN')}</p>
+            )}
           </div>
-
           <button
+            type="button"
+            aria-label="Add to bag"
             onClick={() => onAddToCart(product)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl shadow-md transition-colors flex items-center justify-center cursor-pointer"
-            title="Add to Cart"
+            className="h-9 px-2.5 rounded-xl bg-stone-900 text-white inline-flex items-center gap-1 text-xs font-bold"
           >
-            <ShoppingBag className="w-4 h-4" />
+            <ShoppingBag className="w-3.5 h-3.5" />
+            <span className="hidden xs:inline sm:inline">Add</span>
           </button>
         </div>
       </div>
-    </div>
+    </article>
   );
 }
